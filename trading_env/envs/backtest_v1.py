@@ -83,6 +83,9 @@ class trading_env:
             self.backtest_done = True 
         return df_section
 
+    def backtest(self):
+        return self.obs_return 
+        
     def reset(self):
         self.render_on = 0
         self.df_sample = self._choice_section()

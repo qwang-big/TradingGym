@@ -20,14 +20,23 @@ import numpy as np
 import pandas as pd
 import trading_env
 
-df = pd.read_hdf('dataset/SGXTW.h5', 'STW')
+#data files from www.HistData.com.
+names=['datetime','open', 'high', 'low', 'close', 'volume']
+df = pd.read_csv('dataset/DAT_ASCII_EURUSD_M1_201704.csv',sep=';',header=0,index_col=False,names=names)
+df.datetime=pd.to_datetime(df.datetime)
+old,j = 0,0
+sn = np.zeros((len(df),), dtype=int)
+for i in range(len(df)):
+	j = 0 if df.datetime[i].day != old else j+1
+	sn[i] = j 
+	old = df.datetime[i].day
+
+
+df=df.join(pd.Series(sn,name="serial_number"))
 
 env = trading_env.make(env_id='training_v1', obs_data_len=256, step_len=128,
-                       df=df, fee=0.1, max_position=5, deal_col_name='Price', 
-                       feature_names=['Price', 'Volume', 
-                                      'Ask_price','Bid_price', 
-                                      'Ask_deal_vol','Bid_deal_vol',
-                                      'Bid/Ask_deal', 'Updown'])
+                       df=df, fee=0.1, max_position=5, deal_col_name='close', 
+                       feature_names=names)
 
 env.reset()
 env.render()
@@ -42,6 +51,8 @@ for i in range(500):
     env.render()
     if done:
         break
+				
+
 env.transaction_details
 ```
 - obs_data_len: observation data length
@@ -81,11 +92,8 @@ env.transaction_details
  - loading env just like training
 ``` python
 env = trading_env.make(env_id='backtest_v1', obs_data_len=1024, step_len=512,
-                       df=df, fee=0.1, max_position=5, deal_col_name='Price', 
-                        feature_names=['Price', 'Volume', 
-                                       'Ask_price','Bid_price', 
-                                       'Ask_deal_vol','Bid_deal_vol',
-                                       'Bid/Ask_deal', 'Updown'])
+                       df=df, fee=0.1, max_position=5, deal_col_name='close', 
+                        feature_names=names)
 ```
 - load your own agent
 
@@ -117,6 +125,8 @@ while not env.backtest_done:
         if done:
             transactions.append(info)
             break
+						
+
 transaction = pd.concate(transactions)
 transaction
 ```
