@@ -114,6 +114,10 @@ class YourAgent:
 ``` python
 agent = YourAgent()
 
+def backtest(self):
+	return self.df 
+
+trading_env.envs.backtest_v1.trading_env.backtest=backtest
 transactions = []
 while not env.backtest_done:
     state = env.backtest()
